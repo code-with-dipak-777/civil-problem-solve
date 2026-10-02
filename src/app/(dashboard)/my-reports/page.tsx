@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, MoreVertical, Eye, MapPin, Calendar, Clock } from "lucide-react";
+import { Search, Filter, MoreVertical, Eye, MapPin, Calendar, Clock, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockIssues } from "@/data/mock-data";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -14,11 +13,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDashboardStore } from "@/store";
+import { useEffect } from "react";
 
 const filters = ["All", "Pending", "In Progress", "Resolved", "Rejected"];
 
 export default function MyReportsPage() {
   const [activeFilter, setActiveFilter] = useState("All");
+  const { issues, fetchIssues } = useDashboardStore();
+
+  useEffect(() => {
+    fetchIssues();
+  }, [fetchIssues]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -30,7 +36,7 @@ export default function MyReportsPage() {
     }
   };
 
-  const filteredIssues = mockIssues.filter(issue => 
+  const filteredIssues = issues.filter(issue => 
     activeFilter === "All" || issue.status === activeFilter
   );
 
@@ -105,10 +111,8 @@ export default function MyReportsPage() {
                   <h3 className="font-bold text-lg text-white leading-tight">{issue.title}</h3>
                 </div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="text-muted-foreground hover:text-white transition-colors p-1 rounded-md hover:bg-white/10">
-                      <MoreVertical className="h-4 w-4" />
-                    </button>
+                  <DropdownMenuTrigger className="text-muted-foreground hover:text-white transition-colors p-1 rounded-md hover:bg-white/10">
+                    <MoreVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem>Share</DropdownMenuItem>
@@ -121,7 +125,7 @@ export default function MyReportsPage() {
               <div className="space-y-2 mt-4 mb-6">
                 <div className="flex items-start gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 text-white/50 shrink-0 mt-0.5" />
-                  <span className="line-clamp-2">{issue.location}, {issue.ward}</span>
+                  <span className="line-clamp-2">{issue.location}, {issue.district}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 text-white/50 shrink-0" />

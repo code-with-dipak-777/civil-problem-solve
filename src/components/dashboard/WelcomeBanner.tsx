@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export function WelcomeBanner() {
   const { currentUser } = useDashboardStore();
-  const firstName = currentUser.name.split(' ')[0];
+  const firstName = currentUser?.name ? currentUser.name.split(' ')[0] : 'Guest';
 
   return (
     <motion.div 
@@ -40,7 +40,7 @@ export function WelcomeBanner() {
             <p className="text-sm font-medium text-white/80">Partly Cloudy</p>
             <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
               <MapPin className="h-3 w-3" />
-              <span>Domjuri, {currentUser.city}</span>
+              <span>Domjuri, {currentUser?.city || 'India'}</span>
             </div>
           </div>
         </div>

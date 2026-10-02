@@ -113,7 +113,7 @@ export function TopDistrictsChart() {
         <div className="relative w-full max-w-[550px] aspect-square drop-shadow-2xl mt-[-20px]">
           <svg viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 w-full h-full filter drop-shadow-[0_0_15px_rgba(16,185,129,0.15)] overflow-visible">
             {jharkhandGeoJson.features.map((feature, i) => {
-              const districtName = feature.properties.NAME_2 || feature.properties.district;
+              const districtName = feature.properties.NAME_2 || (feature.properties as any).district;
               const displayName = aliases[districtName] || districtName;
               const issues = districtIssues[districtName] || 0;
               const hasIssues = issues > 0;

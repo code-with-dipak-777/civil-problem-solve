@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { mockIssues } from "@/data/mock-data";
-import { MapPin, Calendar, CheckCircle2, Circle, Clock, ArrowLeft, Share2, ThumbsUp, Building } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MapPin, Calendar, CheckCircle2, Circle, Clock, ArrowLeft, Share2, ThumbsUp, Building, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -10,8 +10,16 @@ export default function ReportDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const issueId = params.id as string;
-  
-  const issue = mockIssues.find(i => i.id === issueId) || mockIssues[0]; // fallback for demo
+  const [issue, setIssue] = useState<any>(null);
+
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/issues/${issueId}`)
+      .then(res => res.json())
+      .then(data => setIssue(data.data || data))
+      .catch(err => console.error(err));
+  }, [issueId]);
+
+  if (!issue) return <div className="p-8 text-center text-white">Loading...</div>;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -25,8 +33,8 @@ export default function ReportDetailsPage() {
 
   return (
     <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <button 
-        onClick={() => router.back()} 
+      <button
+        onClick={() => router.back()}
         className="flex items-center text-sm font-medium text-muted-foreground hover:text-white transition-colors mb-6"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -40,7 +48,7 @@ export default function ReportDetailsPage() {
             <div className="h-[400px] w-full relative">
               <img src={issue.photoUrl} alt={issue.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
-              
+
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="flex flex-wrap items-center gap-3 mb-3">
                   <Badge variant="outline" className={`px-3 py-1 text-xs font-bold uppercase tracking-wider backdrop-blur-md ${getStatusColor(issue.status)}`}>
@@ -63,7 +71,7 @@ export default function ReportDetailsPage() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Location</p>
                     <p className="text-white">{issue.location}</p>
-                    <p className="text-white/60 text-sm">{issue.ward}</p>
+                    <p className="text-white/60 text-sm">{issue.district}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -147,7 +155,7 @@ export default function ReportDetailsPage() {
                 </div>
               </div>
             </div>
-            
+
             <Button className="w-full rounded-xl bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <ThumbsUp className="h-4 w-4 mr-2" />
               Support Issue

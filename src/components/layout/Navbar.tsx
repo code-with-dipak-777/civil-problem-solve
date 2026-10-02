@@ -54,10 +54,10 @@ export function Navbar() {
 
         <button className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 p-1 pr-3 hover:bg-white/5 transition-colors">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={currentUser.avatar} />
-            <AvatarFallback>DK</AvatarFallback>
+            <AvatarImage src={currentUser?.avatar} />
+            <AvatarFallback>CC</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-white/90">Hi, Dipak</span>
+          <span className="text-sm font-medium text-white/90">Hi, {currentUser?.name ? currentUser.name.split(' ')[0] : 'Guest'}</span>
         </button>
       </div>
     </header>

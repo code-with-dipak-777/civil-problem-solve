@@ -4,15 +4,22 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 export function FinalCTA() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <section className="py-24 md:py-32 relative overflow-hidden bg-[#03111F]">
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-emerald-900/20" />
         {/* Animated Map Pins in Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-          {[...Array(10)].map((_, i) => (
+          {mounted && [...Array(10)].map((_, i) => (
             <motion.div
               key={i}
               initial={{ y: "100vh", opacity: 0 }}

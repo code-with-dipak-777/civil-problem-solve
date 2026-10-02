@@ -1,38 +1,69 @@
-# civil-problem-solve
+# Civic Connect 🏙️
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Civic Connect is a modern, interactive web application designed to help citizens report and track civic issues in their city (such as potholes, garbage overflow, broken streetlights, etc.). This platform aims to bridge the gap between local administration and citizens by providing a transparent and efficient reporting system.
 
-## Getting Started
+## 🌟 Key Features
 
-First, run the development server:
+- **Easy Reporting:** Citizens can easily report issues by taking photos, providing precise locations, and adding descriptions.
+- **AI Auto-Merge:** The system uses AI to detect duplicate reports of similar issues in the same area and merges them to help authorities prioritize effectively.
+- **Interactive Map:** A custom map view built with D3.js and Recharts allows you to see issues around you or filter them by specific districts (e.g., districts in Jharkhand).
+- **Real-time Tracking:** Track the live status of your reports (Pending, In Progress, Resolved, Rejected) through a clear timeline.
+- **Dashboard & Analytics:** Beautiful charts and statistics for both administrators and general users, showing issue distribution and resolution rates across different districts.
+- **Premium UI/UX:** Features a sleek, modern glassmorphism design with smooth micro-animations using Framer Motion and Tailwind CSS.
 
+## 💻 Tech Stack
+
+This project is built using modern web technologies:
+
+- **Frontend Framework:** Next.js (App Router), React
+- **Styling:** Tailwind CSS (Modern Glassmorphism Design)
+- **Icons:** Lucide React
+- **Animations:** Framer Motion, GSAP
+- **Charts & Maps:** Recharts, D3.js (Geomapping)
+- **Forms & Validation:** React Hook Form, Zod
+- **State Management:** Zustand
+- **UI Components:** Shadcn UI (Base UI)
+
+## 🚀 Getting Started
+
+Follow these steps to run the project on your local machine:
+
+### 1. Clone the repository
+```bash
+git clone <your-repository-url>
+cd civic-connect
+```
+
+### 2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+### 3. Start the development server
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Once the server is running, open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 Folder Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app` - Next.js App Router pages (Dashboard, Report Issue, Authentication, etc.)
+- `src/components` - Reusable UI components (Charts, Maps, Navbar, Sidebar, StatCards, etc.)
+- `src/data` - Mock data for demonstrations (`mock-data.ts`) and GeoJSON files for maps.
+- `src/store` - Zustand state management files.
+- `src/types` - TypeScript type definitions and interfaces.
 
-## Learn More
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome! If you want to make major changes, please open an issue first to discuss what you would like to change.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📜 License
+This project is open-source and available under the MIT License.

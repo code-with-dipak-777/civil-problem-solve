@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/toast"; // wait, the toast needs a hook, maybe shadcn toast is installed.
+// Removed useToast import
 import { IssueCategory } from "@/types";
 
 const formSchema = z.object({
@@ -28,6 +28,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function ReportIssuePage() {
   const [photo, setPhoto] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -47,6 +48,7 @@ export default function ReportIssuePage() {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setPhotoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhoto(reader.result as string);
@@ -69,13 +71,50 @@ export default function ReportIssuePage() {
     setIsSubmitting(true);
     setShowDuplicateDialog(false);
     
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setShowSuccessDialog(true);
-    form.reset();
-    setPhoto(null);
+    try {
+      const formData = new FormData();
+      formData.append('title', `${data.category} Issue`);
+      formData.append('description', data.description);
+      formData.append('category', data.category);
+      formData.append('priority', data.priority);
+      formData.append('location', data.location);
+      formData.append('district', data.district);
+      formData.append('latitude', '23.3441');
+      formData.append('longitude', '85.3096');
+      if (data.landmark) formData.append('landmark', data.landmark);
+      
+      if (photoFile) {
+        formData.append('photo', photoFile);
+      } else {
+        // Create a dummy file if no photo uploaded
+        const dummyBlob = new Blob(['dummy content'], { type: 'image/jpeg' });
+        formData.append('photo', dummyBlob, 'dummy.jpg');
+      }
+
+      // Automatically use the correct IP address if testing on a local network (e.g., from a phone)
+      const backendUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000' 
+        : `http://${window.location.hostname}:5000`;
+
+      const res = await fetch(`${backendUrl}/api/issues`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit');
+      }
+
+      setShowSuccessDialog(true);
+      form.reset();
+      setPhoto(null);
+      setPhotoFile(null);
+    } catch (error) {
+      console.error(error);
+      alert('Error submitting report. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -134,7 +173,7 @@ export default function ReportIssuePage() {
               {/* Category */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">Issue Category</label>
-                <Select onValueChange={(val) => form.setValue('category', val)}>
+                <Select onValueChange={(val: any) => form.setValue('category', val)}>
                   <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -155,7 +194,7 @@ export default function ReportIssuePage() {
               {/* Priority */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">Priority Level</label>
-                <Select onValueChange={(val) => form.setValue('priority', val)}>
+                <Select onValueChange={(val: any) => form.setValue('priority', val)}>
                   <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12">
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
@@ -196,7 +235,7 @@ export default function ReportIssuePage() {
               {/* District */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">District</label>
-                <Select onValueChange={(val) => form.setValue('district', val)}>
+                <Select onValueChange={(val: any) => form.setValue('district', val)}>
                   <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12">
                     <SelectValue placeholder="Select district" />
                   </SelectTrigger>

@@ -5,15 +5,7 @@ import { FileText, Clock, CheckCircle, ArrowRight, TrendingUp } from "lucide-rea
 import Link from "next/link";
 import { DashboardStats } from "@/types";
 
-const mockStats: DashboardStats = {
-  totalIssues: 12,
-  newToday: 2,
-  pending: 5,
-  pendingPercentage: 41.7,
-  resolved: 7,
-  resolvedPercentage: 58.3,
-  userReports: 4,
-};
+import { useEffect, useState } from "react";
 
 const container = {
   hidden: { opacity: 0 },
@@ -23,12 +15,29 @@ const container = {
   }
 };
 
-const item = {
+const item: any = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
 export function StatCards() {
+  const [stats, setStats] = useState<any>({
+    totalIssues: 0,
+    newToday: 0,
+    pending: 0,
+    pendingPercentage: 0,
+    resolved: 0,
+    resolvedPercentage: 0,
+    userReports: 0,
+  });
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/stats/dashboard')
+      .then(res => res.json())
+      .then(data => setStats(data.data || data))
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <motion.div 
       variants={container}
@@ -47,9 +56,9 @@ export function StatCards() {
         <div className="relative z-10">
           <p className="text-sm font-medium text-blue-200/70 mb-1">Total Issues</p>
           <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold text-white">{mockStats.totalIssues}</h3>
+            <h3 className="text-3xl font-bold text-white">{stats.totalIssues}</h3>
             <span className="flex items-center text-xs font-medium text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">
-              <TrendingUp className="h-3 w-3 mr-1" /> {mockStats.newToday} new today
+              <TrendingUp className="h-3 w-3 mr-1" /> {stats.newToday} new today
             </span>
           </div>
         </div>
@@ -66,8 +75,8 @@ export function StatCards() {
         <div className="relative z-10">
           <p className="text-sm font-medium text-orange-200/70 mb-1">Pending</p>
           <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold text-white">{mockStats.pending}</h3>
-            <span className="text-sm font-medium text-orange-200/70">{mockStats.pendingPercentage}%</span>
+            <h3 className="text-3xl font-bold text-white">{stats.pending}</h3>
+            <span className="text-sm font-medium text-orange-200/70">{stats.pendingPercentage}%</span>
           </div>
         </div>
       </motion.div>
@@ -83,8 +92,8 @@ export function StatCards() {
         <div className="relative z-10">
           <p className="text-sm font-medium text-emerald-200/70 mb-1">Resolved</p>
           <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold text-white">{mockStats.resolved}</h3>
-            <span className="text-sm font-medium text-emerald-200/70">{mockStats.resolvedPercentage}%</span>
+            <h3 className="text-3xl font-bold text-white">{stats.resolved}</h3>
+            <span className="text-sm font-medium text-emerald-200/70">{stats.resolvedPercentage}%</span>
           </div>
         </div>
       </motion.div>
@@ -100,7 +109,7 @@ export function StatCards() {
         <div className="relative z-10 flex flex-col h-full justify-end">
           <p className="text-sm font-medium text-purple-200/70 mb-1">Your Reports</p>
           <div className="flex items-end justify-between w-full">
-            <h3 className="text-3xl font-bold text-white">{mockStats.userReports}</h3>
+            <h3 className="text-3xl font-bold text-white">{stats.userReports}</h3>
             <Link href="/my-reports" className="flex items-center text-xs font-medium text-purple-300 hover:text-white transition-colors">
               View all <ArrowRight className="h-3 w-3 ml-1" />
             </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, Locate, Plus, Minus, Filter } from "lucide-react";
 import {
   Select,
@@ -11,17 +11,30 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
-const mapMarkers = [
-  { id: 1, type: "pothole", x: 20, y: 30, color: "bg-red-500", cluster: 3 },
-  { id: 2, type: "garbage", x: 45, y: 60, color: "bg-emerald-500", cluster: 0 },
-  { id: 3, type: "streetlight", x: 70, y: 25, color: "bg-orange-500", cluster: 0 },
-  { id: 4, type: "water", x: 80, y: 80, color: "bg-blue-500", cluster: 0 },
-  { id: 5, type: "pothole", x: 30, y: 70, color: "bg-red-500", cluster: 0 },
-  { id: 6, type: "garbage", x: 60, y: 40, color: "bg-emerald-500", cluster: 2 },
-];
-
 export function IssuesMap() {
   const [district, setDistrict] = useState("all");
+  const [mapMarkers, setMapMarkers] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/issues')
+      .then(res => res.json())
+      .then(data => {
+        const issues = Array.isArray(data) ? data : data.data || [];
+        // Map issues to markers format
+        const markers = issues.map((issue: any, index: number) => ({
+          id: issue.id || index,
+          type: issue.category?.toLowerCase() || 'other',
+          x: issue.longitude || Math.random() * 80 + 10, // fallback if coords are missing
+          y: issue.latitude || Math.random() * 80 + 10,
+          color: issue.category === 'Garbage' ? 'bg-emerald-500' : issue.category === 'Pothole' ? 'bg-red-500' : 'bg-orange-500',
+          cluster: 0,
+          title: issue.title,
+          status: issue.status
+        }));
+        setMapMarkers(markers);
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   return (
     <div className="glass-card rounded-3xl overflow-hidden flex flex-col h-[400px] border border-white/5">
@@ -31,7 +44,7 @@ export function IssuesMap() {
           <h3 className="font-semibold text-white">Issues Around You</h3>
         </div>
         <div className="w-32">
-          <Select value={district} onValueChange={setDistrict}>
+          <Select value={district} onValueChange={(val: any) => setDistrict(val)}>
             <SelectTrigger className="h-8 bg-white/5 border-none text-xs">
               <SelectValue placeholder="All Districts" />
             </SelectTrigger>

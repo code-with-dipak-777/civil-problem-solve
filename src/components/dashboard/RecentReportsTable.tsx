@@ -5,9 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import { mockIssues } from "@/data/mock-data";
+import { useEffect } from "react";
 
 export function RecentReportsTable() {
+  const { issues, fetchIssues } = useDashboardStore();
+  
+  useEffect(() => {
+    fetchIssues();
+  }, [fetchIssues]);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Pending': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
@@ -40,7 +46,7 @@ export function RecentReportsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockIssues.slice(0, 5).map((issue) => (
+            {issues.slice(0, 5).map((issue) => (
               <TableRow key={issue.id} className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
                 <TableCell>
                   <div className="h-10 w-12 rounded-lg overflow-hidden border border-white/10 relative">

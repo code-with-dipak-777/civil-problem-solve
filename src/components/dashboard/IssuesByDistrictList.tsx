@@ -3,10 +3,19 @@
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { mockDistrictStats } from "@/data/mock-data";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export function IssuesByDistrictList() {
+  const [districtStats, setDistrictStats] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/stats/district')
+      .then(res => res.json())
+      .then(data => setDistrictStats(Array.isArray(data) ? data : data.data || []))
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <div className="glass-card rounded-3xl border border-white/5 overflow-hidden flex flex-col h-full">
       <div className="p-5 border-b border-white/5 flex items-center justify-between bg-card/50">
@@ -17,7 +26,7 @@ export function IssuesByDistrictList() {
       </div>
       
       <div className="p-2 overflow-y-auto flex-1">
-        {mockDistrictStats.map((district, index) => {
+        {districtStats.map((district, index) => {
           const resolvedPercent = district.total > 0 ? (district.resolved / district.total) * 100 : 0;
           const pendingPercent = district.total > 0 ? (district.pending / district.total) * 100 : 0;
           

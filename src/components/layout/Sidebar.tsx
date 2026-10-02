@@ -87,14 +87,14 @@ export function Sidebar() {
 
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border border-white/5">
           <Avatar className="h-10 w-10 border border-primary/20">
-            <AvatarImage src={currentUser.avatar} />
-            <AvatarFallback>DK</AvatarFallback>
+            <AvatarImage src={currentUser?.avatar} />
+            <AvatarFallback>CC</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{currentUser.name}</p>
+            <p className="text-sm font-medium text-white truncate">{currentUser?.name || 'Guest User'}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-sm font-medium">{currentUser.badge}</span>
-              <span className="text-xs text-muted-foreground truncate">{currentUser.district}</span>
+              <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-sm font-medium">{currentUser?.badge || 'Citizen'}</span>
+              <span className="text-xs text-muted-foreground truncate">{currentUser?.district || ''}</span>
             </div>
           </div>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
