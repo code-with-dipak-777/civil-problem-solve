@@ -14,27 +14,37 @@ import { Badge } from "@/components/ui/badge";
 export function IssuesMap() {
   const [district, setDistrict] = useState("all");
   const [mapMarkers, setMapMarkers] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/issues')
       .then(res => res.json())
       .then(data => {
         const issues = Array.isArray(data) ? data : data.data || [];
+        // Collect unique districts
+        const uniqueDistricts = [...new Set(issues.map((i: any) => i.district).filter(Boolean))] as string[];
+        setDistricts(uniqueDistricts);
         // Map issues to markers format
         const markers = issues.map((issue: any, index: number) => ({
-          id: issue.id || index,
+          id: issue.id || issue._id || index,
           type: issue.category?.toLowerCase() || 'other',
-          x: issue.longitude || Math.random() * 80 + 10, // fallback if coords are missing
+          x: issue.longitude || Math.random() * 80 + 10,
           y: issue.latitude || Math.random() * 80 + 10,
           color: issue.category === 'Garbage' ? 'bg-emerald-500' : issue.category === 'Pothole' ? 'bg-red-500' : 'bg-orange-500',
           cluster: 0,
           title: issue.title,
-          status: issue.status
+          status: issue.status,
+          location: issue.location,
+          district: issue.district,
         }));
         setMapMarkers(markers);
       })
       .catch(err => console.error(err));
   }, []);
+
+  const filteredMarkers = district === "all" 
+    ? mapMarkers 
+    : mapMarkers.filter(m => m.district?.toLowerCase().replace(/\s+/g, '-') === district);
 
   return (
     <div className="glass-card rounded-3xl overflow-hidden flex flex-col h-[400px] border border-white/5">
@@ -50,34 +60,22 @@ export function IssuesMap() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Districts</SelectItem>
-              <SelectItem value="ranchi">Ranchi</SelectItem>
-              <SelectItem value="dhanbad">Dhanbad</SelectItem>
-              <SelectItem value="east-singhbhum">East Singhbhum</SelectItem>
-              <SelectItem value="bokaro">Bokaro</SelectItem>
-              <SelectItem value="hazaribagh">Hazaribagh</SelectItem>
-              <SelectItem value="deoghar">Deoghar</SelectItem>
+              {districts.map(d => (
+                <SelectItem key={d} value={d.toLowerCase().replace(/\s+/g, '-')}>{d}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <div className="relative flex-1 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-900 overflow-hidden group">
+      <div className="relative flex-1 bg-slate-900 overflow-hidden group">
         <div className="absolute inset-0 bg-blue-500/10 mix-blend-overlay"></div>
         
-        {/* Mock Map grid lines */}
+        {/* Map grid lines */}
         <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         
-        {/* Fake street lines */}
-        <div className="absolute top-1/3 left-0 right-0 h-1.5 bg-white/10 rotate-12 origin-left"></div>
-        <div className="absolute top-0 bottom-0 left-1/2 w-2 bg-white/10 -rotate-12 origin-top"></div>
-        <div className="absolute top-2/3 left-0 right-0 h-1 bg-white/10 -rotate-6 origin-right"></div>
-        
-        {/* City/Area Labels */}
-        <span className="absolute top-1/4 left-1/4 text-white/30 font-bold text-xl uppercase tracking-widest">Domjuri</span>
-        <span className="absolute bottom-1/4 right-1/4 text-white/20 font-bold text-lg uppercase tracking-widest">East Singhbhum</span>
-        
         {/* Markers */}
-        {mapMarkers.map((marker) => (
+        {filteredMarkers.map((marker) => (
           <div 
             key={marker.id}
             className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform hover:scale-125 z-10"
@@ -91,9 +89,9 @@ export function IssuesMap() {
             ) : (
               <div className="relative group/tooltip">
                 <div className="absolute -top-12 -left-16 w-32 bg-popover text-popover-foreground text-xs p-2 rounded-lg shadow-xl opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 border border-white/10">
-                  <p className="font-semibold text-white capitalize">{marker.type}</p>
-                  <p className="text-muted-foreground truncate">Location details...</p>
-                  <p className="text-primary mt-1">Status: Pending</p>
+                  <p className="font-semibold text-white capitalize">{marker.title || marker.type}</p>
+                  <p className="text-muted-foreground truncate">{marker.location || 'Unknown location'}</p>
+                  <p className="text-primary mt-1">Status: {marker.status || 'Pending'}</p>
                 </div>
                 <MapPin className={`h-8 w-8 ${marker.color.replace('bg-', 'text-')} drop-shadow-md`} />
                 <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 h-2 w-4 bg-black/40 blur-[2px] rounded-[100%] -z-10`}></div>
@@ -101,6 +99,12 @@ export function IssuesMap() {
             )}
           </div>
         ))}
+
+        {filteredMarkers.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-sm text-white/40">No issues found</p>
+          </div>
+        )}
 
         {/* Map Controls */}
         <div className="absolute right-4 top-4 flex flex-col gap-2">
@@ -122,10 +126,6 @@ export function IssuesMap() {
           <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div><span className="text-white/80">Pothole</span></div>
           <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></div><span className="text-white/80">Garbage</span></div>
           <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.8)]"></div><span className="text-white/80">Streetlight</span></div>
-        </div>
-        
-        <div className="absolute bottom-2 right-2 opacity-50">
-          <span className="text-[9px] text-white/50 font-mono">MockMap™</span>
         </div>
       </div>
     </div>

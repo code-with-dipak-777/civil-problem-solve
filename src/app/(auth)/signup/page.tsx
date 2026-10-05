@@ -1,7 +1,30 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowRight, Mail, Lock, User, MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ArrowRight, Mail, Lock, User, MapPin, Loader2 } from "lucide-react";
+import { useDashboardStore } from "@/store";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const { signup, isAuthLoading, authError, clearAuthError } = useDashboardStore();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [district, setDistrict] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearAuthError();
+
+    const success = await signup({ name, email, password, district, city: district });
+    if (success) {
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <div className="bg-[#051726]/80 backdrop-blur-xl py-10 px-6 sm:px-12 rounded-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
       <div className="mb-8 text-center sm:text-left">
@@ -9,7 +32,16 @@ export default function SignupPage() {
         <p className="text-white/60 mt-2 text-sm">Join CivicConnect to start reporting issues in your neighborhood.</p>
       </div>
 
-      <form className="space-y-5" action="#">
+      {authError && (
+        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+          <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          {authError}
+        </div>
+      )}
+
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-white/80 mb-2">
             Full Name
@@ -24,6 +56,8 @@ export default function SignupPage() {
               type="text"
               autoComplete="name"
               required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors sm:text-sm"
               placeholder="John Doe"
             />
@@ -44,6 +78,8 @@ export default function SignupPage() {
               type="email"
               autoComplete="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors sm:text-sm"
               placeholder="you@example.com"
             />
@@ -62,16 +98,17 @@ export default function SignupPage() {
               id="district"
               name="district"
               required
-              defaultValue=""
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
               className="block w-full pl-10 pr-10 py-3 border border-white/10 rounded-xl bg-[#051726] text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors sm:text-sm appearance-none"
             >
               <option value="" disabled>Select your district</option>
-              <option value="ranchi">Ranchi</option>
-              <option value="dhanbad">Dhanbad</option>
-              <option value="east-singhbhum">East Singhbhum</option>
-              <option value="bokaro">Bokaro</option>
-              <option value="hazaribagh">Hazaribagh</option>
-              <option value="deoghar">Deoghar</option>
+              <option value="Ranchi">Ranchi</option>
+              <option value="Dhanbad">Dhanbad</option>
+              <option value="East Singhbhum">East Singhbhum</option>
+              <option value="Bokaro">Bokaro</option>
+              <option value="Hazaribagh">Hazaribagh</option>
+              <option value="Deoghar">Deoghar</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <ArrowRight className="h-4 w-4 text-white/40 rotate-90" />
@@ -93,6 +130,8 @@ export default function SignupPage() {
               type="password"
               autoComplete="new-password"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors sm:text-sm"
               placeholder="••••••••"
             />
@@ -103,10 +142,20 @@ export default function SignupPage() {
         <div className="pt-2">
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-[#03111F] bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#051726] focus:ring-emerald-500 transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+            disabled={isAuthLoading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-[#03111F] bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#051726] focus:ring-emerald-500 transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create account
-            <ArrowRight className="w-4 h-4" />
+            {isAuthLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Creating account...
+              </>
+            ) : (
+              <>
+                Create account
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </form>

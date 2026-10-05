@@ -58,8 +58,8 @@ export function Sidebar() {
               href={item.href}
               className={cn(
                 "flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-300 group",
-                isActive 
-                  ? "bg-gradient-to-r from-primary/20 to-transparent text-primary subtle-glow" 
+                isActive
+                  ? "bg-gradient-to-r from-primary/20 to-transparent text-primary subtle-glow"
                   : "text-muted-foreground hover:bg-white/5 hover:text-white"
               )}
             >
@@ -99,6 +99,14 @@ export function Sidebar() {
           </div>
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </div>
+
+        <button
+          onClick={() => useDashboardStore.getState().logout()}
+          className="flex items-center gap-3 w-full mt-3 px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-300 group"
+        >
+          <LogOut className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
+          <span className="font-medium text-sm">Logout</span>
+        </button>
       </div>
     </aside>
   );

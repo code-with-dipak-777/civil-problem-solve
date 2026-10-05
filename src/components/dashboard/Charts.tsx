@@ -1,14 +1,40 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-
-const donutData = [
-  { name: 'Garbage', value: 5, color: '#10b981' }, // emerald-500
-  { name: 'Pothole', value: 4, color: '#ef4444' }, // red-500
-  { name: 'Streetlight', value: 3, color: '#f97316' }, // orange-500
-];
+import { useEffect, useState } from 'react';
 
 export function IssueTypeDistribution() {
+  const [donutData, setDonutData] = useState<{ name: string; value: number; color: string }[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/issues')
+      .then(res => res.json())
+      .then(data => {
+        const issues = Array.isArray(data) ? data : data.data || [];
+        const categoryMap: Record<string, number> = {};
+        issues.forEach((issue: any) => {
+          const cat = issue.category || 'Other';
+          categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+        });
+        const colorMap: Record<string, string> = {
+          'Garbage': '#10b981',
+          'Pothole': '#ef4444',
+          'Streetlight': '#f97316',
+          'Water': '#3b82f6',
+          'Other': '#8b5cf6',
+        };
+        const chartData = Object.entries(categoryMap).map(([name, value]) => ({
+          name,
+          value,
+          color: colorMap[name] || '#6b7280',
+        }));
+        setDonutData(chartData);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  const total = donutData.reduce((sum, d) => sum + d.value, 0);
+
   return (
     <div className="glass-card rounded-3xl border border-white/5 overflow-hidden h-full flex flex-col">
       <div className="p-5 border-b border-white/5 bg-card/50">
@@ -16,52 +42,58 @@ export function IssueTypeDistribution() {
       </div>
 
       <div className="p-4 flex-1 flex flex-col sm:flex-row items-center justify-center gap-6">
-        <div className="h-40 w-40 relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={donutData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="value"
-                stroke="none"
-              >
-                {donutData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <RechartsTooltip
-                contentStyle={{ backgroundColor: '#1e293b', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
-                itemStyle={{ color: '#fff' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-2xl font-bold text-white">12</span>
-            <span className="text-[10px] text-muted-foreground uppercase">Total</span>
-          </div>
-        </div>
-
-        <div className="space-y-3 w-full sm:w-auto">
-          {donutData.map((item) => {
-            const percentage = ((item.value / 12) * 100).toFixed(1);
-            return (
-              <div key={item.name} className="flex items-center justify-between gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
-                  <span className="text-white/90 font-medium">{item.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-white">{item.value}</span>
-                  <span className="text-muted-foreground text-xs w-10 text-right">({percentage}%)</span>
-                </div>
+        {donutData.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No data available</p>
+        ) : (
+          <>
+            <div className="h-40 w-40 relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={donutData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {donutData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    contentStyle={{ backgroundColor: '#1e293b', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-2xl font-bold text-white">{total}</span>
+                <span className="text-[10px] text-muted-foreground uppercase">Total</span>
               </div>
-            );
-          })}
-        </div>
+            </div>
+
+            <div className="space-y-3 w-full sm:w-auto">
+              {donutData.map((item) => {
+                const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0';
+                return (
+                  <div key={item.name} className="flex items-center justify-between gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
+                      <span className="text-white/90 font-medium">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white">{item.value}</span>
+                      <span className="text-muted-foreground text-xs w-10 text-right">({percentage}%)</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -69,15 +101,6 @@ export function IssueTypeDistribution() {
 
 import { geoMercator, geoPath } from 'd3-geo';
 import jharkhandGeoJson from '@/data/jharkhand.json';
-
-const districtIssues: Record<string, number> = {
-  'Ranchi': 3,
-  'Dhanbad': 2,
-  'Purba Singhbhum': 2, // East Singhbhum
-  'Bokaro': 1,
-  'Hazaribag': 0, // Hazaribagh
-  'Deoghar': 0,
-};
 
 // Add human-readable aliases
 const aliases: Record<string, string> = {
@@ -88,6 +111,25 @@ const aliases: Record<string, string> = {
 };
 
 export function TopDistrictsChart() {
+  const [districtIssues, setDistrictIssues] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/stats/district')
+      .then(res => res.json())
+      .then(data => {
+        const stats = Array.isArray(data) ? data : data.data || [];
+        const map: Record<string, number> = {};
+        stats.forEach((d: any) => {
+          // Map display names back to GeoJSON names for matching
+          const geoName = Object.entries(aliases).find(([, v]) => v === d.district)?.[0] || d.district;
+          map[geoName] = d.pending || 0;
+          map[d.district] = d.pending || 0;
+        });
+        setDistrictIssues(map);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   // Setup d3 geo projection
   const width = 500;
   const height = 500;
@@ -115,7 +157,7 @@ export function TopDistrictsChart() {
             {jharkhandGeoJson.features.map((feature, i) => {
               const districtName = feature.properties.NAME_2 || (feature.properties as any).district;
               const displayName = aliases[districtName] || districtName;
-              const issues = districtIssues[districtName] || 0;
+              const issues = districtIssues[districtName] || districtIssues[displayName] || 0;
               const hasIssues = issues > 0;
               
               // Calculate centroid for placing markers

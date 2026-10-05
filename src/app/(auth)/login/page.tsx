@@ -1,7 +1,31 @@
-import Link from "next/link";
-import { ArrowRight, Mail, Lock } from "lucide-react";
+"use client";
 
-export default function LoginPage() {
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import { ArrowRight, Mail, Lock, Loader2 } from "lucide-react";
+import { useDashboardStore } from "@/store";
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  const { login, isAuthLoading, authError, clearAuthError } = useDashboardStore();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearAuthError();
+
+    const success = await login(email, password);
+    if (success) {
+      router.push(callbackUrl);
+    }
+  };
+
   return (
     <div className="bg-[#051726]/80 backdrop-blur-xl py-10 px-6 sm:px-12 rounded-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]">
       <div className="mb-8 text-center sm:text-left">
@@ -9,7 +33,16 @@ export default function LoginPage() {
         <p className="text-white/60 mt-2 text-sm">Enter your details to sign in to your account</p>
       </div>
 
-      <form className="space-y-6" action="#">
+      {authError && (
+        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+          <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          {authError}
+        </div>
+      )}
+
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
             Email address
@@ -24,6 +57,8 @@ export default function LoginPage() {
               type="email"
               autoComplete="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors sm:text-sm"
               placeholder="you@example.com"
             />
@@ -51,6 +86,8 @@ export default function LoginPage() {
               type="password"
               autoComplete="current-password"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl bg-white/5 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-colors sm:text-sm"
               placeholder="••••••••"
             />
@@ -62,7 +99,7 @@ export default function LoginPage() {
             id="remember-me"
             name="remember-me"
             type="checkbox"
-            className="h-4 w-4 rounded bg-[#03111F] border border-white/10 text-emerald-500 focus:ring-emerald-500/50 focus:ring-offset-0 cursor-pointer appearance-none checked:bg-emerald-500 checked:border-emerald-500 relative before:content-[''] before:absolute before:inset-0 before:bg-[url('data:image/svg+xml;utf8,<svg%20fill=%22%2303111F%22%20viewBox=%220%200%2020%2020%20%22%20xmlns=%22http://www.w3.org/2000/svg%22><path%20fill-rule=%22evenodd%22%20d=%22M16.707%205.293a1%201%200%20010%201.414l-8%208a1%201%200%2001-1.414%200l-4-4a1%201%200%20011.414-1.414L8%2012.586l7.293-7.293a1%201%200%20011.414%200z%22%20clip-rule=%22evenodd%22></path></svg>')] checked:before:block before:hidden"
+            className="h-4 w-4 rounded bg-[#03111F] border border-white/10 text-emerald-500 focus:ring-emerald-500/50 focus:ring-offset-0 cursor-pointer"
           />
           <label htmlFor="remember-me" className="ml-3 block text-sm text-white/60 cursor-pointer select-none hover:text-white/80 transition-colors">
             Remember me
@@ -72,10 +109,20 @@ export default function LoginPage() {
         <div>
           <button
             type="submit"
-            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-[#03111F] bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#051726] focus:ring-emerald-500 transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+            disabled={isAuthLoading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-[#03111F] bg-gradient-to-r from-emerald-400 to-cyan-500 hover:from-emerald-300 hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#051726] focus:ring-emerald-500 transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign in
-            <ArrowRight className="w-4 h-4" />
+            {isAuthLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                Sign in
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -113,5 +160,17 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-[#051726]/80 backdrop-blur-xl py-10 px-6 sm:px-12 rounded-3xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
