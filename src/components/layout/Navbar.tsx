@@ -1,15 +1,16 @@
 "use client";
 
-import { Bell, Search, HelpCircle, Menu } from 'lucide-react';
+import { Bell, Search, HelpCircle, Menu, LogOut, User, MapPin, Shield } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDashboardStore } from '@/store';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sidebar } from './Sidebar';
 
 export function Navbar() {
-  const { currentUser, notifications } = useDashboardStore();
+  const { currentUser, notifications, logout } = useDashboardStore();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
@@ -40,7 +41,7 @@ export function Navbar() {
         <button className="text-muted-foreground hover:text-white transition-colors">
           <HelpCircle className="h-5 w-5" />
         </button>
-        
+
         <button className="relative text-muted-foreground hover:text-white transition-colors">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -52,13 +53,59 @@ export function Navbar() {
 
         <div className="h-8 w-px bg-white/10 mx-2 hidden sm:block"></div>
 
-        <button className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 p-1 pr-3 hover:bg-white/5 transition-colors">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={currentUser?.avatar} />
-            <AvatarFallback>CC</AvatarFallback>
-          </Avatar>
-          <span className="text-sm font-medium text-white/90">Hi, {currentUser?.name ? currentUser.name.split(' ')[0] : 'Guest'}</span>
-        </button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 p-1 pr-3 hover:bg-white/5 transition-colors focus:outline-none">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={currentUser?.avatar} />
+                <AvatarFallback>CC</AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium text-white/90">Hi, {currentUser?.name ? currentUser.name.split(' ')[0] : 'Guest'}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 p-0 bg-[#051726] border-white/10 rounded-xl overflow-hidden shadow-2xl mt-2">
+            <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 p-6 flex flex-col items-center border-b border-white/5">
+              <Avatar className="h-16 w-16 mb-3 border-2 border-background">
+                <AvatarImage src={currentUser?.avatar} />
+                <AvatarFallback className="text-lg bg-emerald-500/20 text-emerald-400">CC</AvatarFallback>
+              </Avatar>
+              <h3 className="font-semibold text-lg text-white">{currentUser?.name || 'Guest'}</h3>
+              <p className="text-sm text-white/60">{currentUser?.email || 'guest@civicconnect.in'}</p>
+            </div>
+            
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3 text-sm text-white/80">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-white/40 mb-0.5">Role</p>
+                  <p className="font-medium">{currentUser?.role || 'Citizen'}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 text-sm text-white/80">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-white/40 mb-0.5">Location</p>
+                  <p className="font-medium">{currentUser?.district || 'Unknown'}, {currentUser?.city || 'Unknown'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-2 border-t border-white/5">
+              <button 
+                onClick={logout}
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Log out
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   );

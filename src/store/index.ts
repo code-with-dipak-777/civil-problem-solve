@@ -60,6 +60,8 @@ interface DashboardState {
   // Auth actions
   login: (email: string, password: string) => Promise<boolean>;
   signup: (data: { name: string; email: string; password: string; district: string; city?: string }) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
   logout: () => void;
   clearAuthError: () => void;
 
@@ -138,6 +140,41 @@ export const useDashboardStore = create<DashboardState>((set) => ({
       set({ isAuthLoading: false, authError: err.message || 'Network error' });
       return false;
     }
+  },
+
+  loginWithGoogle: async () => {
+    set({ isAuthLoading: true, authError: null });
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const mockGoogleUser = {
+        id: 'g123456789',
+        name: 'Google User',
+        email: 'user@gmail.com',
+        role: 'Citizen',
+        district: 'Ranchi',
+        city: 'Ranchi',
+        badge: 'Verified',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Google'
+      } as any;
+      set({ currentUser: mockGoogleUser, isAuthLoading: false, authError: null });
+      setAuthToken("mock-google-token");
+      return true;
+    } catch (err) {
+      set({ isAuthLoading: false, authError: 'Google login failed' });
+      return false;
+    }
+  },
+
+  resetPassword: async (email: string) => {
+    if (!email) {
+      set({ authError: 'Please enter your email address first' });
+      return false;
+    }
+    set({ isAuthLoading: true, authError: null });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    set({ isAuthLoading: false, authError: null });
+    alert(`Password reset link sent to ${email}`);
+    return true;
   },
 
   logout: () => {

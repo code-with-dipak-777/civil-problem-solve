@@ -11,10 +11,25 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  const { login, isAuthLoading, authError, clearAuthError } = useDashboardStore();
+  const { login, loginWithGoogle, resetPassword, isAuthLoading, authError, clearAuthError } = useDashboardStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const handleGoogleLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    clearAuthError();
+    const success = await loginWithGoogle();
+    if (success) {
+      router.push(callbackUrl);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    clearAuthError();
+    await resetPassword(email);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +86,7 @@ function LoginForm() {
               Password
             </label>
             <div className="text-sm">
-              <a href="#" className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+              <a href="#" onClick={handleForgotPassword} className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
                 Forgot password?
               </a>
             </div>
@@ -140,6 +155,7 @@ function LoginForm() {
         <div className="mt-6 flex flex-col gap-4">
           <a
             href="#"
+            onClick={handleGoogleLogin}
             className="w-full flex justify-center items-center px-4 py-3 border border-white/10 rounded-xl bg-white/5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

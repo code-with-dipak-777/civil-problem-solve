@@ -8,9 +8,18 @@ import { useDashboardStore } from "@/store";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, isAuthLoading, authError, clearAuthError } = useDashboardStore();
+  const { signup, loginWithGoogle, isAuthLoading, authError, clearAuthError } = useDashboardStore();
 
   const [name, setName] = useState("");
+
+  const handleGoogleLogin = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    clearAuthError();
+    const success = await loginWithGoogle();
+    if (success) {
+      router.push("/dashboard");
+    }
+  };
   const [email, setEmail] = useState("");
   const [district, setDistrict] = useState("");
   const [password, setPassword] = useState("");
@@ -173,6 +182,7 @@ export default function SignupPage() {
         <div className="mt-6 flex flex-col gap-4">
           <a
             href="#"
+            onClick={handleGoogleLogin}
             className="w-full flex justify-center items-center px-4 py-3 border border-white/10 rounded-xl bg-white/5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -11,6 +11,7 @@ import issueRoutes from './routes/issue.routes';
 import notificationRoutes from './routes/notification.routes';
 import statsRoutes from './routes/stats.routes';
 import adminRoutes from './routes/admin.routes';
+import { getAllUsers } from './controllers/admin.controller';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/issues', issueRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
+app.get('/api/users', getAllUsers);
 
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: 'CivicConnect API is running' });
